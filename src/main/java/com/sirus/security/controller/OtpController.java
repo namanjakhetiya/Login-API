@@ -43,12 +43,29 @@ public class OtpController {
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		}
 	}
-
-	@PostMapping("/validateOtp")
-	public ResponseEntity<?> validateOTP(@RequestParam int otp) {
+	
+	@GetMapping("/resendOtp")
+	public ResponseEntity<?> resendOtp(@RequestParam String retryType) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String username = auth.getName();
-		
+
+		Map<String, String> response = new HashMap<>(2);
+
+		// check authentication
+		if (username == null) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+		otpService.resendOtp(username,retryType);
+		response.put("user", username);
+		response.put("message", "OTP is Sent!");
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	@PostMapping("/validateOtp")
+	public ResponseEntity<?> validateOtp(@RequestParam int otp) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String username = auth.getName();
+
 		Map<String, String> response = new HashMap<>(2);
 
 		// check authentication
@@ -59,9 +76,9 @@ public class OtpController {
 		Integer serverOtp = -1;
 		// Validate the Otp
 		if (otp >= 0) {
-			serverOtp = otpService.validateOtp(username);
+			serverOtp = otpService.validateOtp(username, otp);
 		}
-		
+
 		if (serverOtp > 0 && otp == serverOtp) {
 			otpService.clearOtpFromCache(username);
 

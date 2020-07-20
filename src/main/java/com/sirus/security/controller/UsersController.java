@@ -35,23 +35,23 @@ public class UsersController {
 	}
 
 	@GetMapping("byid")
-	public ResponseEntity<Optional<Users>> getUserById(@RequestParam Long id){
+	public ResponseEntity<Optional<Users>> getUserById(@RequestParam Long id) {
 		return usersService.getUserById(id);
 	}
-	
+
 	@GetMapping("bymobile")
-	public ResponseEntity<Optional<Users>> getUserByMobile(@RequestParam String mobile){
+	public ResponseEntity<Optional<Users>> getUserByMobile(@RequestParam String mobile) {
 		return usersService.getUserByMobile(mobile);
 	}
-	
+
 	@PutMapping("update")
-	public ResponseEntity<Users> update(@RequestBody Users user){
+	public ResponseEntity<Users> update(@RequestBody Users user) {
 		return usersService.update(user);
 	}
-	
+
 	@DeleteMapping("delete")
-	public ResponseEntity<Users> delete(@RequestBody Users user){
+	public ResponseEntity<Users> delete(@RequestBody Users user) {
 		return usersService.delete(user);
 	}
-	
+
 }
