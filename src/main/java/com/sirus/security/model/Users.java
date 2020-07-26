@@ -18,7 +18,7 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @ToString
-public class Users {
+public class Users extends DefaultTimeStamps {
 	@Id
 	@GeneratedValue
 	private Long id;

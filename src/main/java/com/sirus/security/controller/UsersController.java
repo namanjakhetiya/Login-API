@@ -1,13 +1,11 @@
 package com.sirus.security.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,23 +22,18 @@ public class UsersController {
 	@Autowired
 	UsersService usersService;
 
-	@PostMapping("add")
-	public ResponseEntity<Users> add(@RequestBody Users user) {
-		return usersService.add(user);
-	}
-
 	@GetMapping("all")
 	public ResponseEntity<List<Users>> all() {
 		return usersService.all();
 	}
 
 	@GetMapping("byid")
-	public ResponseEntity<Optional<Users>> getUserById(@RequestParam Long id) {
+	public ResponseEntity<Users> getUserById(@RequestParam Long id) {
 		return usersService.getUserById(id);
 	}
 
 	@GetMapping("bymobile")
-	public ResponseEntity<Optional<Users>> getUserByMobile(@RequestParam String mobile) {
+	public ResponseEntity<Users> getUserByMobile(@RequestParam String mobile) {
 		return usersService.getUserByMobile(mobile);
 	}
 

@@ -1,95 +1,52 @@
 package com.sirus.security.controller;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sirus.security.model.OtpRequest;
+import com.sirus.security.model.PasswordResetRequest;
 import com.sirus.security.service.OtpService;
+import com.sirus.security.service.UsersService;
 
 @RestController
+@CrossOrigin
+@RequestMapping("/api/v1/otp/")
 public class OtpController {
 
 	@Autowired
 	OtpService otpService;
+	
+	@Autowired
+	private UsersService usersService;
 
-	@GetMapping("/generateOtp")
-	public ResponseEntity<?> generateOtp() {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String username = auth.getName();
+	@RequestMapping(value = "send", method = RequestMethod.POST)
+	public ResponseEntity<?> send(@RequestParam String username) {
+		return otpService.send(username);
+	}
 
-		Map<String, String> response = new HashMap<>(2);
+	@GetMapping("resend")
+	public ResponseEntity<Map<String,String>> resend(@RequestParam String username) {
+		return otpService.resend(username);
+	}
 
-		// check authentication
-		if (username == null) {
-			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-		}
-
-		// generate OTP.
-		Integer otp = otpService.generateOtp(username);
-		if (otp == -1) {
-			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-		} else {
-			response.put("user", username);
-			response.put("otp", String.valueOf(otp));
-			return new ResponseEntity<>(response, HttpStatus.OK);
-		}
+	@PostMapping("validate")
+	public ResponseEntity<?> validate(@RequestBody OtpRequest authenticationRequest) throws Exception {
+		return otpService.validate(authenticationRequest);
 	}
 	
-	@GetMapping("/resendOtp")
-	public ResponseEntity<?> resendOtp(@RequestParam String retryType) {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String username = auth.getName();
-
-		Map<String, String> response = new HashMap<>(2);
-
-		// check authentication
-		if (username == null) {
-			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-		}
-		otpService.resendOtp(username,retryType);
-		response.put("user", username);
-		response.put("message", "OTP is Sent!");
-		return new ResponseEntity<>(response, HttpStatus.OK);
+	@RequestMapping(value = "reset/password", method = RequestMethod.POST)
+	public ResponseEntity<Map<String,String>> resetPassword(@RequestBody PasswordResetRequest request) {
+		return usersService.resetPassword(request);
 	}
-
-	@PostMapping("/validateOtp")
-	public ResponseEntity<?> validateOtp(@RequestParam int otp) {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String username = auth.getName();
-
-		Map<String, String> response = new HashMap<>(2);
-
-		// check authentication
-		if (username == null) {
-			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-		}
-
-		Integer serverOtp = -1;
-		// Validate the Otp
-		if (otp >= 0) {
-			serverOtp = otpService.validateOtp(username, otp);
-		}
-
-		if (serverOtp > 0 && otp == serverOtp) {
-			otpService.clearOtpFromCache(username);
-
-			// success message
-			response.put("status", "success");
-			response.put("message", "Entered OTP is valid!");
-			return new ResponseEntity<>(response, HttpStatus.OK);
-		} else {
-			response.put("status", "error");
-			response.put("message", "OTP is not valid!");
-			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-		}
-	}
+	
 }
